@@ -1,0 +1,134 @@
+{
+  "entities": {
+    "Church": {
+      "title": "Church",
+      "description": "Represents an Adventist church or group within the Restinga district",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nome": { "type": "string" },
+        "tipo": { "type": "string", "enum": ["igreja", "grupo"] },
+        "distrito": { "type": "string" },
+        "ativo": { "type": "boolean" },
+        "criadoPor": { "type": "string" },
+        "criadoEm": { "type": "string" },
+        "atualizadoEm": { "type": "string" }
+      },
+      "required": ["nome", "tipo", "distrito", "ativo"]
+    },
+    "StudySeries": {
+      "title": "StudySeries",
+      "description": "A series or curriculum of Bible studies available in the catalog",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nome": { "type": "string" },
+        "totalEstudos": { "type": "number" },
+        "ativo": { "type": "boolean" },
+        "criadoPor": { "type": "string" },
+        "criadoEm": { "type": "string" },
+        "atualizadoEm": { "type": "string" }
+      },
+      "required": ["nome", "totalEstudos", "ativo"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile information corresponding to permissions and local church hierarchy",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nome": { "type": "string" },
+        "email": { "type": "string" },
+        "emailAuth": { "type": "string" },
+        "perfil": { "type": "string", "enum": ["admin", "distrital", "local", "membro"] },
+        "username": { "type": "string" },
+        "igrejaId": { "type": "string" },
+        "igrejaNome": { "type": "string" },
+        "distrito": { "type": "string" },
+        "ativo": { "type": "boolean" },
+        "criadoPor": { "type": "string" },
+        "criadoEm": { "type": "string" },
+        "atualizadoEm": { "type": "string" }
+      },
+      "required": ["nome", "emailAuth", "perfil", "ativo", "distrito"]
+    },
+    "InterestedPerson": {
+      "title": "InterestedPerson",
+      "description": "An interested candidate receiving study sessions in the district",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nome": { "type": "string" },
+        "telefone": { "type": "string" },
+        "endereco": { "type": "string" },
+        "igrejaId": { "type": "string" },
+        "igrejaNome": { "type": "string" },
+        "igrejaTipo": { "type": "string" },
+        "distrito": { "type": "string" },
+        "instrutorIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "instrutorNomes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "criadoPorId": { "type": "string" },
+        "criadoPorNome": { "type": "string" },
+        "criadoPorPerfil": { "type": "string" },
+        "serieId": { "type": "string" },
+        "serieNome": { "type": "string" },
+        "estudoAtual": { "type": "number" },
+        "totalEstudos": { "type": "number" },
+        "porcentagem": { "type": "number" },
+        "faltantes": { "type": "number" },
+        "status": { "type": "string" },
+        "interesse": { "type": "string", "enum": ["Alto", "Médio", "Baixo"] },
+        "observacoes": { "type": "string" },
+        "ultimoContato": { "type": "string" },
+        "criadoEm": { "type": "string" },
+        "atualizadoEm": { "type": "string" }
+      },
+      "required": ["nome", "igrejaId", "distrito", "criadoPorId", "status", "serieId"]
+    },
+    "LoginIndex": {
+      "title": "LoginIndex",
+      "description": "Internal username to firebase email reference lookup table for authentication",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "igrejaId": { "type": "string" },
+        "igrejaNome": { "type": "string" },
+        "perfil": { "type": "string" },
+        "emailAuth": { "type": "string" },
+        "ativo": { "type": "boolean" },
+        "criadoEm": { "type": "string" },
+        "atualizadoEm": { "type": "string" }
+      },
+      "required": ["username", "emailAuth", "perfil", "ativo"]
+    }
+  },
+  "firestore": {
+    "/locais/{localId}": {
+      "schema": "Church",
+      "description": "Store containing congregations and mission groups"
+    },
+    "/series/{serieId}": {
+      "schema": "StudySeries",
+      "description": "Catalog of available Bible study manuals"
+    },
+    "/usuarios/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles and assigned role status in the district hierarchy"
+    },
+    "/interessados/{interessadoId}": {
+      "schema": "InterestedPerson",
+      "description": "Active interested students database"
+    },
+    "/login_index/{loginId}": {
+      "schema": "LoginIndex",
+      "description": "Lookup index for offline security checks using virtual credentials"
+    }
+  }
+}

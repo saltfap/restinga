@@ -80,7 +80,7 @@ export default function Sidebar({
           </div>
           <div>
             <span className="text-[10px] tracking-wider font-extrabold uppercase text-emerald-300/80 block">Estudos Bíblicos</span>
-            <h2 className="font-display font-bold text-base text-white tracking-tight -mt-0.5">D. da Restinga</h2>
+            <h2 className="font-display font-bold text-base text-white tracking-tight -mt-0.5">Distrito da Restinga</h2>
           </div>
         </div>
 

@@ -5,6 +5,8 @@ import {
   getDocs, 
   doc, 
   getDoc, 
+  setDoc,
+  addDoc,
   updateDoc, 
   query, 
   where 
@@ -70,7 +72,7 @@ export default function App() {
   }
 
   // Load profile of logged on user
-  async function fetchUserProfile(uid: string): Promise<UserProfile | null> {
+  async function fetchUserProfile(uid: string, emailAuth?: string | null): Promise<UserProfile | null> {
     try {
       const ref = doc(db, "usuarios", uid);
       const snap = await getDoc(ref);
@@ -78,6 +80,22 @@ export default function App() {
         const data = snap.data();
         if (data.ativo === false) return null;
         return { id: snap.id, ...data } as UserProfile;
+      } else if (emailAuth === "rickyjorgecastro@gmail.com" || auth.currentUser?.email === "rickyjorgecastro@gmail.com") {
+        const newProfile: UserProfile = {
+          id: uid,
+          nome: "Pastor Ricky",
+          email: "rickyjorgecastro@gmail.com",
+          emailAuth: "rickyjorgecastro@gmail.com",
+          perfil: "admin",
+          username: "ricky",
+          igrejaId: "",
+          igrejaNome: "",
+          distrito: "Restinga",
+          ativo: true,
+          criadoEm: new Date().toISOString()
+        };
+        await setDoc(ref, newProfile);
+        return newProfile;
       }
     } catch (e) {
       console.error("Error loading user profile:", e);
@@ -90,7 +108,7 @@ export default function App() {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setIsAuthLoading(true);
       if (firebaseUser) {
-        const profile = await fetchUserProfile(firebaseUser.uid);
+        const profile = await fetchUserProfile(firebaseUser.uid, firebaseUser.email || auth.currentUser?.email);
         if (profile) {
           const allowedRoles = ["admin", "distrital", "local", "membro"];
           if (allowedRoles.includes(profile.perfil)) {
@@ -122,15 +140,39 @@ export default function App() {
     try {
       // 1. Fetch places
       const locaisSnap = await getDocs(collection(db, "locais"));
-      const listLocais = locaisSnap.docs
+      let listLocais = locaisSnap.docs
         .map(d => ({ id: d.id, ...d.data() } as Church))
         .filter(d => d.ativo !== false);
+      if (listLocais.length === 0 && currentUser.perfil === "admin") {
+        const initialChurches = [
+          { nome: "IASD Central da Restinga", tipo: "igreja" as const, distrito: "Restinga", ativo: true, criadoEm: new Date().toISOString() },
+          { nome: "IASD Restinga Nova", tipo: "igreja" as const, distrito: "Restinga", ativo: true, criadoEm: new Date().toISOString() },
+          { nome: "IASD Jardim Ipê", tipo: "grupo" as const, distrito: "Restinga", ativo: true, criadoEm: new Date().toISOString() }
+        ];
+        for (const c of initialChurches) {
+          await addDoc(collection(db, "locais"), c);
+        }
+        const reSnap = await getDocs(collection(db, "locais"));
+        listLocais = reSnap.docs.map(d => ({ id: d.id, ...d.data() } as Church)).filter(d => d.ativo !== false);
+      }
       setLocais(listLocais);
 
       // 2. Fetch series
       const seriesSnap = await getDocs(collection(db, "series"));
-      const listSeries = seriesSnap.docs
+      let listSeries = seriesSnap.docs
         .map(d => ({ id: d.id, ...d.data() } as StudySeries));
+      if (listSeries.length === 0 && currentUser.perfil === "admin") {
+        const initialSeries = [
+          { nome: "O Grande Conflito", totalEstudos: 24, ativo: true, criadoEm: new Date().toISOString() },
+          { nome: "Apocalipse: Revelação de Esperança", totalEstudos: 18, ativo: true, criadoEm: new Date().toISOString() },
+          { nome: "Bíblia Fácil", totalEstudos: 12, ativo: true, criadoEm: new Date().toISOString() }
+        ];
+        for (const s of initialSeries) {
+          await addDoc(collection(db, "series"), s);
+        }
+        const reSnap = await getDocs(collection(db, "series"));
+        listSeries = reSnap.docs.map(d => ({ id: d.id, ...d.data() } as StudySeries));
+      }
       setSeries(listSeries);
 
       // 3. Fetch system authors/users based on permissions

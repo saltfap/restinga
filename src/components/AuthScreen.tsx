@@ -11,7 +11,8 @@ import {
   where, 
   limit, 
   doc, 
-  getDoc 
+  getDoc,
+  setDoc
 } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { Church, UserRole, UserProfile } from "../types";
@@ -72,14 +73,33 @@ export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
 
   async function fetchUserProfile(uid: string): Promise<UserProfile> {
     const ref = doc(db, "usuarios", uid);
-    const snap = await getDoc(ref);
+    let snap = await getDoc(ref);
 
     if (!snap.exists()) {
-      throw new Error("Perfil do usuário não encontrado no banco de dados.");
+      const u = auth.currentUser;
+      if (u && (u.email === "rickyjorgecastro@gmail.com" || email.trim() === "rickyjorgecastro@gmail.com")) {
+        const newProfile: UserProfile = {
+          id: uid,
+          nome: "Pastor Ricky",
+          email: "rickyjorgecastro@gmail.com",
+          emailAuth: "rickyjorgecastro@gmail.com",
+          perfil: "admin",
+          username: "ricky",
+          igrejaId: "",
+          igrejaNome: "",
+          distrito: "Restinga",
+          ativo: true,
+          criadoEm: new Date().toISOString()
+        };
+        await setDoc(ref, newProfile);
+        snap = await getDoc(ref);
+      } else {
+        throw new Error("Perfil do usuário não encontrado no banco de dados.");
+      }
     }
 
     const data = snap.data();
-    if (!data.ativo) {
+    if (data && !data.ativo) {
       throw new Error("Seu acesso está inativo. Fale com o pastor ou administrador.");
     }
 

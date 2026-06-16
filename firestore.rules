@@ -1,0 +1,138 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default global deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    function getUserRole() {
+      return getUserData().perfil;
+    }
+
+    function getUserChurch() {
+      return getUserData().igrejaId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'rickyjorgecastro@gmail.com' ||
+        (exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) && getUserRole() == 'admin')
+      );
+    }
+
+    function isDistrital() {
+      return isSignedIn() && (
+        isAdmin() ||
+        (exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) && getUserRole() == 'distrital')
+      );
+    }
+
+    function isLocal() {
+      return isSignedIn() && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) && getUserRole() == 'local';
+    }
+
+    function isMembro() {
+      return isSignedIn() && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) && getUserRole() == 'membro';
+    }
+
+    function isSameChurch(churchId) {
+      return getUserChurch() == churchId;
+    }
+
+    // --- locais ---
+    match /locais/{localId} {
+      allow read: if true; // Guests selecting their local church during auth registration
+      allow write: if isSignedIn() && (isAdmin() || isDistrital());
+    }
+
+    // --- series ---
+    match /series/{serieId} {
+      allow read: if true; // Visible to any signed-in users or unregistered catalog browser
+      allow write: if isSignedIn() && (isAdmin() || isDistrital());
+    }
+
+    // --- usuarios ---
+    match /usuarios/{userId} {
+      allow read: if isSignedIn() && (
+        request.auth.uid == userId ||
+        isAdmin() ||
+        isDistrital() ||
+        (isLocal() && isSameChurch(resource.data.igrejaId))
+      );
+      allow create: if isSignedIn() && (
+        isAdmin() ||
+        isDistrital() ||
+        (isLocal() && isSameChurch(request.resource.data.igrejaId))
+      );
+      allow update: if isSignedIn() && (
+        request.auth.uid == userId ||
+        isAdmin() ||
+        isDistrital() ||
+        (isLocal() && isSameChurch(resource.data.igrejaId) && isSameChurch(request.resource.data.igrejaId) && request.resource.data.perfil != 'admin' && request.resource.data.perfil != 'distrital')
+      );
+      allow delete: if isSignedIn() && (isAdmin() || isDistrital());
+    }
+
+    // --- login_index ---
+    match /login_index/{loginId} {
+      allow read: if true; // Required unauthenticated lookup to fetch virtual email for login flow
+      allow create: if isSignedIn() && (
+        isAdmin() ||
+        isDistrital() ||
+        (isLocal() && isSameChurch(request.resource.data.igrejaId))
+      );
+      allow update, delete: if isSignedIn() && (
+        isAdmin() ||
+        isDistrital() ||
+        (isLocal() && isSameChurch(resource.data.igrejaId))
+      );
+    }
+
+    // --- interessados ---
+    match /interessados/{interessadoId} {
+      allow read: if isSignedIn() && (
+        isAdmin() ||
+        isDistrital() ||
+        (isLocal() && isSameChurch(resource.data.igrejaId)) ||
+        (isMembro() && (
+          resource.data.criadoPorId == request.auth.uid ||
+          (resource.data.instrutorIds != null && request.auth.uid in resource.data.instrutorIds)
+        ))
+      );
+
+      allow create: if isSignedIn() && (
+        isAdmin() ||
+        isDistrital() ||
+        (isLocal() && isSameChurch(request.resource.data.igrejaId)) ||
+        isMembro()
+      );
+
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        isDistrital() ||
+        (isLocal() && isSameChurch(request.resource.data.igrejaId) && isSameChurch(request.resource.data.igrejaId)) ||
+        (isMembro() && (
+          resource.data.criadoPorId == request.auth.uid ||
+          (resource.data.instrutorIds != null && request.auth.uid in resource.data.instrutorIds)
+        ))
+      );
+
+      allow delete: if isSignedIn() && (
+        isAdmin() ||
+        isDistrital() ||
+        (isLocal() && isSameChurch(resource.data.igrejaId))
+      );
+    }
+  }
+}

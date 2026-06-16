@@ -1,20 +1,13 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore, collection, getDocs, doc, getDoc } from "firebase/firestore";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBV5iW3FOYf9tA2BzwP322Otw90JMHgXKE",
-  authDomain: "estudosbiblicosrestinga.firebaseapp.com",
-  projectId: "estudosbiblicosrestinga",
-  storageBucket: "estudosbiblicosrestinga.firebasestorage.app",
-  messagingSenderId: "835895048163",
-  appId: "1:835895048163:web:666e693ef32fdd9dd052d6"
-};
+import firebaseConfig from "../firebase-applet-config.json";
 
 // Initialize Firebase once
 export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
 
 // Custom Firestore Operation Types as requested in the Firebase Skill
 export enum OperationType {
