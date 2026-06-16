@@ -1,0 +1,6 @@
+{
+  "name": "Gestão de Estudo Bíblico",
+  "description": "Painel estratégico do Distrito da Restinga para acompanhar interessados, progresso de lições de estudos bíblicos, instrutores locais e decisões espirituais significativas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
