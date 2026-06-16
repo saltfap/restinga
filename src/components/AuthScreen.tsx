@@ -208,7 +208,7 @@ export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
             <div className="flex items-center gap-3.5 mb-8">
               <div className="w-12 h-12 bg-white/12 rounded-xl border border-white/20 flex items-center justify-center shadow-lg overflow-hidden p-1.5 shrink-0">
                 <img 
-                  src="/logo.png" 
+                  src="./logo.png" 
                   className="w-full h-full object-contain" 
                   alt="Logo" 
                   referrerPolicy="no-referrer"

@@ -72,7 +72,7 @@ export default function Sidebar({
         <div className="flex items-center gap-3 pb-4 border-b border-white/10">
           <div className="w-10 h-10 bg-white/12 rounded-xl flex items-center justify-center border border-white/15 shadow-md overflow-hidden p-1 shrink-0">
             <img 
-              src="/logo.png" 
+              src="./logo.png" 
               className="w-full h-full object-contain" 
               alt="Logo" 
               referrerPolicy="no-referrer"

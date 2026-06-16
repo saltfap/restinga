@@ -14,7 +14,7 @@ export default function Header({ title, description, onOpenNewInteressadoModal }
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 block md:hidden overflow-hidden shrink-0">
             <img 
-              src="/logo.png" 
+              src="./logo.png" 
               className="w-full h-full object-contain filter invert opacity-80" 
               alt="Logo" 
               referrerPolicy="no-referrer"
